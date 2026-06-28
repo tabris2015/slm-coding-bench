@@ -1,0 +1,19 @@
+# Example: benchmark a cloud OpenAI-compatible endpoint for comparison against local models.
+# Set the API key in the environment variable named by api_key_env before running.
+samples: 1
+temp: 0.0
+max_tokens: 1024
+
+tasks_root: tasks
+solvers: ["single_agent"]
+
+deployments:
+  - kind: openai_compat
+    name: openai
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
+    models:
+      - gpt-4o-mini
+
+executor:
+  kind: subprocess
