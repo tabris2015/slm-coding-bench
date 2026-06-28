@@ -1,0 +1,7 @@
+id: classics/fizzbuzz
+origin: classics
+title: FizzBuzz
+entrypoint: fizzbuzz
+signature: "fizzbuzz(n: int) -> list[str]"
+suites: [test]
+reference_file: reference.py

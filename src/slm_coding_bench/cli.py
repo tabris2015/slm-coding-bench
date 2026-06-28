@@ -30,8 +30,10 @@ def list_tasks(tasks_root: str = typer.Option("tasks", "--tasks-root")) -> None:
     """List discovered tasks and which suites each declares."""
     tasks = load_tasks(tasks_root)
     for t in tasks:
-        suites = ",".join(s.value for s in t.manifest.suites)
-        console.print(f"[bold]{t.id}[/bold]  ({t.origin})  suites=[{suites}]  -> {t.manifest.title}")
+        suites = "+".join(s.value for s in t.manifest.suites)
+        console.print(
+            f"[bold]{t.id}[/bold]  ({t.origin})  suites={suites}  -> {t.manifest.title}"
+        )
     console.print(f"\n{len(tasks)} tasks")
 
 

@@ -1,0 +1,7 @@
+id: classics/gcd
+origin: classics
+title: Greatest common divisor
+entrypoint: gcd
+signature: "gcd(a: int, b: int) -> int"
+suites: [test]
+reference_file: reference.py

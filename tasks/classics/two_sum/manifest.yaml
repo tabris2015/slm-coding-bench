@@ -1,0 +1,7 @@
+id: classics/two_sum
+origin: classics
+title: Two sum
+entrypoint: two_sum
+signature: "two_sum(nums: list[int], target: int) -> list[int]"
+suites: [test]
+reference_file: reference.py

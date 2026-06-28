@@ -1,0 +1,10 @@
+id: custom/min_heap
+origin: custom
+title: Min heap
+entrypoint: MinHeap
+signature: "class MinHeap(); push(x: int) -> None; pop() -> int; peek() -> int; __len__() -> int"
+suites: [test, parity, perf]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
+perf: {warmup: 1, points: [{name: "n=20000", size: 20000, repeats: 7}]}

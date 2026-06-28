@@ -1,0 +1,7 @@
+id: classics/is_anagram
+origin: classics
+title: Valid anagram
+entrypoint: is_anagram
+signature: "is_anagram(a: str, b: str) -> bool"
+suites: [test]
+reference_file: reference.py

@@ -1,0 +1,7 @@
+id: classics/count_vowels
+origin: classics
+title: Count vowels
+entrypoint: count_vowels
+signature: "count_vowels(s: str) -> int"
+suites: [test]
+reference_file: reference.py

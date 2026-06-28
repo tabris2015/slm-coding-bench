@@ -1,0 +1,10 @@
+id: custom/lru_cache
+origin: custom
+title: LRU cache
+entrypoint: LRUCache
+signature: "class LRUCache(capacity: int); get(key: int) -> int; put(key: int, value: int) -> None"
+suites: [test, parity, perf]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
+perf: {warmup: 1, points: [{name: "n=20000", size: 20000, repeats: 7}]}

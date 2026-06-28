@@ -1,0 +1,7 @@
+id: classics/roman_to_int
+origin: classics
+title: Roman numeral to integer
+entrypoint: roman_to_int
+signature: "roman_to_int(s: str) -> int"
+suites: [test]
+reference_file: reference.py

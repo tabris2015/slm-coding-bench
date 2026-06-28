@@ -1,0 +1,7 @@
+id: classics/is_palindrome
+origin: classics
+title: Valid palindrome (alphanumeric)
+entrypoint: is_palindrome
+signature: "is_palindrome(s: str) -> bool"
+suites: [test]
+reference_file: reference.py

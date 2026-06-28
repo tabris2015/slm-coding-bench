@@ -1,0 +1,10 @@
+id: custom/levenshtein
+origin: custom
+title: Levenshtein edit distance
+entrypoint: edit_distance
+signature: "edit_distance(a: str, b: str) -> int"
+suites: [test, parity, perf]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
+perf: {warmup: 1, points: [{name: "n=400", size: 400, repeats: 7}]}

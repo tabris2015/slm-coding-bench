@@ -1,0 +1,10 @@
+id: custom/run_length
+origin: custom
+title: Run-length encoding
+entrypoint: rle_encode
+signature: "rle_encode(s: str) -> str"
+suites: [test, parity, perf]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
+perf: {warmup: 1, points: [{name: "n=20000", size: 20000, repeats: 7}]}

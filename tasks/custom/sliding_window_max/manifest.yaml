@@ -1,0 +1,10 @@
+id: custom/sliding_window_max
+origin: custom
+title: Sliding window maximum
+entrypoint: max_sliding_window
+signature: "max_sliding_window(nums: list[int], k: int) -> list[int]"
+suites: [test, parity, perf]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
+perf: {warmup: 1, points: [{name: "n=20000", size: 20000, repeats: 7}]}

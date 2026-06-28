@@ -1,0 +1,7 @@
+id: classics/valid_parentheses
+origin: classics
+title: Valid parentheses
+entrypoint: valid_parentheses
+signature: "valid_parentheses(s: str) -> bool"
+suites: [test]
+reference_file: reference.py
