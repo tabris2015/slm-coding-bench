@@ -138,11 +138,13 @@ class OpenAIDeployment(DeploymentAdapter):
         completion_tokens = (usage or {}).get("completion_tokens")
         if completion_tokens is None:
             completion_tokens = _estimate_tokens(text)
-        # Throughput over the generation phase (exclude prefill / TTFT when known).
-        gen_ms = total_ms - ttft_ms if (ttft_ms is not None) else total_ms
+        # End-to-end throughput (completion tokens over total wall time). Robust across both
+        # plain and reasoning models; TTFT is reported separately for prefill latency. A
+        # generation-phase formula (total - ttft) explodes when streamed content arrives late,
+        # which is exactly the reasoning-model case.
         tok_per_s = None
-        if completion_tokens and gen_ms and gen_ms > 0:
-            tok_per_s = completion_tokens / (gen_ms / 1000.0)
+        if completion_tokens and total_ms and total_ms > 0:
+            tok_per_s = completion_tokens / (total_ms / 1000.0)
         return GenMetrics(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,

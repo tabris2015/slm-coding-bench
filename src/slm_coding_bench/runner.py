@@ -95,8 +95,8 @@ class Runner:
                              sample_index, result.status, result.score,
                              candidate.extraction_ok, candidate.gen_metrics, result.detail)
 
-            mark = "ok" if test_passed else "x"
-            self.progress(f"  [{mark}] {task.id} (sample {sample_index})")
+            mark = "[green]✓[/green]" if test_passed else "[red]✗[/red]"
+            self.progress(f"  {mark} {task.id} (sample {sample_index})")
 
     def _record(self, store, run_id, task, model, dep_name, solver_name, suite, sample_index,
                 status, score, extraction_ok, gen_metrics, detail) -> None:

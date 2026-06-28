@@ -60,6 +60,22 @@ uv run slm-bench run -c configs/m4-local.yaml
 uv run slm-bench report <run_id>
 ```
 
+## Example results
+
+A first run of the three-model MLX roster on an M4 Pro (24 GB), single-agent solver, greedy
+pass@1 — see [`docs/example-report-m4-roster.md`](docs/example-report-m4-roster.md):
+
+| Model | pass@1 (custom) | parity | perf ratio | tok/s (e2e) |
+|---|---|---|---|---|
+| Qwen2.5-Coder-7B-4bit | 100% | 100% | 1.29× | 37 |
+| Qwen2.5-Coder-3B-4bit | 75% | 93.9% | 1.32× | 71 |
+| Qwen3-1.7B-4bit | 25% | 28.6% | 0.97× | 137 |
+
+The parity column already earns its keep: the 3B passes 75% of custom tasks outright but agrees
+with the reference on 93.9% of differential inputs — pass@1 alone would have hidden how close the
+near-misses were. (Qwen3-1.7B is a reasoning model; it spends its token budget "thinking", which
+is why it trails here and needs a larger `max_tokens`.)
+
 ## Status
 
 v1: benchmark core + `single_agent` solver + OpenAI-compatible/`mlx_server` deployment, validated

@@ -1,12 +1,22 @@
-# Benchmark the small-model roster served by mlx_lm.server on the M4 Pro over Tailscale.
-# Start the server(s) first, e.g. on the M4:
-#   uv run mlx_lm.server --model mlx-community/Qwen2.5-Coder-3B-Instruct-4bit \
-#       --host 100.101.97.59 --port 8080
-# mlx_lm.server can serve any cached model via per-request model selection, so a single
-# endpoint can cover all three models below.
+# Benchmark the small-model roster served by mlx_lm.server on a remote Apple Silicon box
+# (an M4 Pro reached over Tailscale).
+#
+# Setup:
+#   1. On the server, start ONE mlx_lm.server bound to localhost. It serves any cached model
+#      via per-request model selection, so one endpoint covers all three models below:
+#        uv run mlx_lm.server --model mlx-community/Qwen3-1.7B-4bit --host 127.0.0.1 --port 8080
+#   2. From the client, open an SSH tunnel to it:
+#        ssh -f -N -L 18080:127.0.0.1:8080 <server>
+#   3. Run: uv run slm-bench run -c configs/m4-local.yaml
+#
+# Why localhost + SSH tunnel instead of binding the tailnet IP directly: mlx_lm.server's
+# single-threaded httpd did not serve reliably when bound to the Tailscale interface IP on a
+# managed macOS host; the localhost bind + tunnel is robust and adds no firewall exposure.
 samples: 1
 temp: 0.0
-max_tokens: 1024
+# 2048 so reasoning models (e.g. Qwen3) have room to "think" and still emit code; raise further
+# if you see reasoning-model answers truncated before the code block.
+max_tokens: 2048
 
 tasks_root: tasks
 # task_glob: ["custom/*"]   # uncomment to restrict
@@ -16,7 +26,7 @@ solvers: ["single_agent"]
 deployments:
   - kind: openai_compat
     name: mlx_m4
-    base_url: "http://100.101.97.59:8080/v1"
+    base_url: "http://127.0.0.1:18080/v1"
     models:
       - mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
       - mlx-community/Qwen2.5-Coder-3B-Instruct-4bit
