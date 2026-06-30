@@ -29,7 +29,19 @@ class MetricsAccumulator:
             self._peak_ram_mb[model] = max(self._peak_ram_mb.get(model, 0.0), mb)
 
     def aggregate(self, model: str, deployment: str) -> ServingMetrics:
-        calls = self._by_model.get(model, [])
+        return self._aggregate(self._by_model.get(model, []), model, deployment)
+
+    def aggregate_combined(self, models: list[str], label: str, deployment: str) -> ServingMetrics:
+        """Merge the calls of several models into one row (for roster/multi-agent solvers)."""
+        calls: list[GenMetrics] = []
+        for m in models:
+            calls.extend(self._by_model.get(m, []))
+        sm = self._aggregate(calls, label, deployment)
+        sm.peak_ram_mb = max((self._peak_ram_mb[m] for m in models if m in self._peak_ram_mb),
+                             default=None)
+        return sm
+
+    def _aggregate(self, calls: list[GenMetrics], model: str, deployment: str) -> ServingMetrics:
         latencies = [m.total_ms for m in calls if m.total_ms is not None]
         ttfts = [m.ttft_ms for m in calls if m.ttft_ms is not None]
         tps = [m.tok_per_s for m in calls if m.tok_per_s is not None]
@@ -80,3 +92,6 @@ class DeploymentAdapter(ABC):
 
     def serving_metrics(self, model: str) -> ServingMetrics:
         return self.metrics.aggregate(model, self.name)
+
+    def combined_serving_metrics(self, models: list[str], label: str) -> ServingMetrics:
+        return self.metrics.aggregate_combined(models, label, self.name)

@@ -22,6 +22,15 @@ class SolverContext(BaseModel):
 class Solver(ABC):
     name: str = "base"
 
+    per_model: bool = True
+    """If True, the runner evaluates this solver once per benchmarked model in the deployment.
+    Roster solvers (e.g. multi-agent, which pin their own per-role models) set this False so the
+    runner evaluates them once and labels the rows with :attr:`roster_label`."""
+
+    def roster_label(self, deployment_models: list[str]) -> str:
+        """Row label for a ``per_model=False`` solver. Defaults to the solver name."""
+        return self.name
+
     @abstractmethod
     def solve(
         self,

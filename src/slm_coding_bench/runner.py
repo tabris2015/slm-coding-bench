@@ -37,7 +37,9 @@ class Runner:
 
         executor = build_executor(cfg.executor)
         suites = build_suites(cfg.executor)
-        solvers = [build_solver(name) for name in cfg.solvers]
+        solvers = [build_solver(spec) for spec in cfg.solver_specs()]
+        per_model = [s for s in solvers if s.per_model]
+        rosters = [s for s in solvers if not s.per_model]
 
         for dep_cfg in cfg.deployments:
             deployment = build_deployment(dep_cfg)
@@ -45,13 +47,26 @@ class Runner:
                 if not deployment.health():
                     self.progress(f"[skip] deployment {dep_cfg.name!r} is unhealthy")
                     continue
+                # Per-model solvers: evaluated once per benchmarked model.
                 for model in dep_cfg.models:
+                    if not per_model:
+                        break
                     self.progress(f"== {dep_cfg.name} :: {model} ==")
-                    for solver in solvers:
+                    for solver in per_model:
                         for task in tasks:
                             self._run_task(store, run_id, deployment, dep_cfg.name, model,
                                            solver, task, executor, suites)
                     store.write_serving(deployment.serving_metrics(model))
+                # Roster solvers (e.g. multi-agent): pin their own role models, evaluated once;
+                # the row is labelled by the solver and serving is the combined role-model cost.
+                for solver in rosters:
+                    label = solver.roster_label(dep_cfg.models)
+                    self.progress(f"== {dep_cfg.name} :: {label} ({solver.name}) ==")
+                    for task in tasks:
+                        self._run_task(store, run_id, deployment, dep_cfg.name, label,
+                                       solver, task, executor, suites)
+                    store.write_serving(
+                        deployment.combined_serving_metrics(dep_cfg.models, label))
         self.progress(f"done; results in {store.run_dir}")
         return store
 

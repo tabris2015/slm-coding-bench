@@ -1,0 +1,44 @@
+# Multi-agent solver on the M4 roster, for A/B vs the single-agent baseline (configs/m4-local.yaml).
+#
+# The multi_agent solver is a roster solver (per_model=False): it pins its own per-role models and
+# is evaluated ONCE, producing a single leaderboard row labelled `multi[...]`. Run it as its own
+# run so serving metrics stay clean, then merge with the baseline run for one comparison table:
+#
+#   uv run slm-bench run -c configs/m4-local.yaml        --run-id baseline       # single_agent x3
+#   uv run slm-bench run -c configs/m4-multi-agent.yaml  --run-id multiagent     # multi_agent x1
+#   uv run slm-bench report baseline multiagent                                  # merged table
+#
+# Roster (the documented heterogeneous design): 7B plans, 3B codes, 1.7B verifies.
+# Verifier ground truth is the prompt's worked `## Examples` (run in a sandbox) + LLM review — it
+# never sees the graded tests.py, so pass@1 stays honest. See solvers/multi_agent.py.
+
+samples: 1
+temp: 0.0
+max_tokens: 2048   # room for the Qwen3 verifier to "think" and still emit a verdict
+
+tasks_root: tasks
+
+solvers:
+  - name: multi_agent
+    params:
+      planner_model: mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
+      coder_model: mlx-community/Qwen2.5-Coder-3B-Instruct-4bit
+      verifier_model: mlx-community/Qwen3-1.7B-4bit
+      max_retries: 2
+
+deployments:
+  - kind: openai_compat
+    name: mlx_m4
+    base_url: "http://127.0.0.1:18080/v1"
+    models:
+      - mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
+      - mlx-community/Qwen2.5-Coder-3B-Instruct-4bit
+      - mlx-community/Qwen3-1.7B-4bit
+
+executor:
+  kind: subprocess
+  test_timeout_s: 15
+  parity_timeout_s: 30
+  perf_timeout_s: 60
+  mem_limit_mb: 1024
+  perf_mem_limit_mb: 2048

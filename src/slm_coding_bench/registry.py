@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from slm_coding_bench.config import DeploymentConfig, ExecutorConfig
+from slm_coding_bench.config import DeploymentConfig, ExecutorConfig, SolverConfig
 from slm_coding_bench.deployments.base import DeploymentAdapter
 from slm_coding_bench.deployments.openai_compat import OpenAIDeployment
 from slm_coding_bench.executors.base import Executor
@@ -29,14 +29,15 @@ def build_deployment(cfg: DeploymentConfig) -> DeploymentAdapter:
     raise ValueError(f"unknown deployment kind: {cfg.kind!r}")
 
 
-def build_solver(name: str) -> Solver:
+def build_solver(spec: SolverConfig | str) -> Solver:
+    spec = SolverConfig.coerce(spec)
     solvers = {
         "single_agent": SingleAgentSolver,
         "multi_agent": MultiAgentSolver,
     }
-    if name not in solvers:
-        raise ValueError(f"unknown solver: {name!r}")
-    return solvers[name]()
+    if spec.name not in solvers:
+        raise ValueError(f"unknown solver: {spec.name!r}")
+    return solvers[spec.name](**spec.params)
 
 
 def build_executor(cfg: ExecutorConfig) -> Executor:

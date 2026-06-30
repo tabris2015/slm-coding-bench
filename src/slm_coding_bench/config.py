@@ -20,6 +20,21 @@ class DeploymentConfig(BaseModel):
     port: int | None = None
 
 
+class SolverConfig(BaseModel):
+    """A solver to run: a name plus optional constructor params (e.g. multi-agent role models)."""
+
+    name: str
+    params: dict = Field(default_factory=dict)
+
+    @classmethod
+    def coerce(cls, spec: "str | dict | SolverConfig") -> "SolverConfig":
+        if isinstance(spec, SolverConfig):
+            return spec
+        if isinstance(spec, str):
+            return cls(name=spec)
+        return cls.model_validate(spec)
+
+
 class ExecutorConfig(BaseModel):
     kind: str = "subprocess"
     test_timeout_s: float = 15.0
@@ -39,13 +54,17 @@ class RunConfig(BaseModel):
     tasks_root: str = "tasks"
     task_glob: list[str] | None = None
 
-    solvers: list[str] = Field(default_factory=lambda: ["single_agent"])
+    solvers: list[str | SolverConfig] = Field(default_factory=lambda: ["single_agent"])
     deployments: list[DeploymentConfig] = Field(default_factory=list)
     executor: ExecutorConfig = Field(default_factory=ExecutorConfig)
 
     # Parity/perf only run on the first sample by default (pass@k is a test-suite concept).
     parity_perf_on_all_samples: bool = False
     results_root: str = "results"
+
+    def solver_specs(self) -> list[SolverConfig]:
+        """Normalize the ``solvers`` field (mix of names and specs) to :class:`SolverConfig`."""
+        return [SolverConfig.coerce(s) for s in self.solvers]
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> RunConfig:

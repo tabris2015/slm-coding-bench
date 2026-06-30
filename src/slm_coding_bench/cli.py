@@ -72,18 +72,28 @@ def run(
 
 @app.command("report")
 def report(
-    run_id: str = typer.Argument(..., help="run id under results/"),
+    run_ids: list[str] = typer.Argument(..., help="one or more run ids under results/; "
+                                        "multiple are merged into a single comparison table"),
     results_root: str = typer.Option("results", "--results-root"),
 ) -> None:
-    """Regenerate the markdown report for an existing run."""
-    store = ResultStore(results_root, run_id)
-    records = store.read_records()
+    """Regenerate the markdown report for a run, or merge several runs into one comparison."""
+    records, serving = [], []
+    for rid in run_ids:
+        store = ResultStore(results_root, rid)
+        records.extend(store.read_records())
+        serving.extend(store.read_serving())
     if not records:
-        console.print(f"[red]no records found for run {run_id}[/red]")
+        console.print(f"[red]no records found for {', '.join(run_ids)}[/red]")
         raise typer.Exit(1)
     samples = max((r.sample_index for r in records), default=0) + 1
-    path = _write_report(store, samples)
-    console.print(path.read_text())
+    out_id = run_ids[0] if len(run_ids) == 1 else "+".join(run_ids)
+    out_store = ResultStore(results_root, out_id)
+    summary = summarize(records, serving, samples)
+    md = render_markdown(summary, out_id)
+    out = out_store.run_dir / "report.md"
+    out.write_text(md)
+    console.print(f"[green]report written:[/green] {out}")
+    console.print(md)
 
 
 def _write_report(store: ResultStore, samples: int) -> Path:
