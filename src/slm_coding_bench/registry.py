@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 
 from slm_coding_bench.config import DeploymentConfig, ExecutorConfig, SolverConfig
@@ -31,6 +32,8 @@ def build_deployment(cfg: DeploymentConfig) -> DeploymentAdapter:
 
 def build_solver(spec: SolverConfig | str) -> Solver:
     spec = SolverConfig.coerce(spec)
+    if spec.import_path:
+        return _load_external_solver(spec.import_path, spec.params)
     solvers = {
         "single_agent": SingleAgentSolver,
         "multi_agent": MultiAgentSolver,
@@ -38,6 +41,15 @@ def build_solver(spec: SolverConfig | str) -> Solver:
     if spec.name not in solvers:
         raise ValueError(f"unknown solver: {spec.name!r}")
     return solvers[spec.name](**spec.params)
+
+
+def _load_external_solver(import_path: str, params: dict) -> Solver:
+    """Load a Solver subclass from ``"module.path:ClassName"`` (for external solver packages)."""
+    module_name, sep, attr = import_path.partition(":")
+    if not sep:
+        raise ValueError(f"import_path must be 'module:Class', got {import_path!r}")
+    cls = getattr(importlib.import_module(module_name), attr)
+    return cls(**params)
 
 
 def build_executor(cfg: ExecutorConfig) -> Executor:

@@ -1,0 +1,51 @@
+# small-council multi-agent solver (external package) on the M4 roster — the framework-based arm
+# of the Phase-4 A/B vs single_agent (configs/m4-local.yaml) and the naive multi_agent
+# (configs/m4-multi-agent.yaml).
+#
+# The solver is loaded via `import_path` from the small-council package, which must be importable in
+# the run environment. small-council is a separate repo (github.com/tabris2015/small-council); make
+# it importable for the run with uv, e.g.:
+#   uv run --with /path/to/small-council slm-bench run -c configs/m4-agent-system.yaml --run-id council
+# (or `uv pip install -e /path/to/small-council` into this project's venv first).
+#
+# It routes every per-role model call through this deployment's chat(), so serving + token metrics
+# are recorded exactly like the built-in solvers, keeping the comparison apples-to-apples. The
+# verifier only sees the prompt's worked examples (run in a sandbox) + an LLM review — never the
+# graded tests.py — so pass@1 stays honest.
+#
+# Serving: this points at one endpoint serving all three models. A single mlx_lm.server swaps models
+# per request (slow); prefer 3 resident servers (e.g. behind llama-swap or a LiteLLM gateway) when
+# running the full A/B. Reach the M4 via the SSH tunnel (ssh -f -N -L 18080:127.0.0.1:8080 m4-server)
+# or set base_url to the tailnet `tailscale serve` URL.
+
+samples: 1
+temp: 0.0
+max_tokens: 2048   # room for the Qwen3 verifier to "think" and still emit a verdict
+
+tasks_root: tasks
+
+solvers:
+  - name: small_council
+    import_path: "small_council.integrations.slm_bench:CouncilSolver"
+    params:
+      planner_model: mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
+      coder_model: mlx-community/Qwen2.5-Coder-3B-Instruct-4bit
+      verifier_model: mlx-community/Qwen3-1.7B-4bit
+      max_retries: 2
+
+deployments:
+  - kind: openai_compat
+    name: mlx_m4
+    base_url: "http://127.0.0.1:18080/v1"
+    models:
+      - mlx-community/Qwen2.5-Coder-7B-Instruct-4bit
+      - mlx-community/Qwen2.5-Coder-3B-Instruct-4bit
+      - mlx-community/Qwen3-1.7B-4bit
+
+executor:
+  kind: subprocess
+  test_timeout_s: 15
+  parity_timeout_s: 30
+  perf_timeout_s: 60
+  mem_limit_mb: 1024
+  perf_mem_limit_mb: 2048

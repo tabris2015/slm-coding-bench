@@ -25,6 +25,10 @@ class SolverConfig(BaseModel):
 
     name: str
     params: dict = Field(default_factory=dict)
+    import_path: str | None = None
+    """Optional ``"module.path:ClassName"`` to load an external solver (e.g. a separate agent
+    package) so new solvers plug in without editing this repo. The target must subclass ``Solver``;
+    ``name`` is still used to label the run."""
 
     @classmethod
     def coerce(cls, spec: "str | dict | SolverConfig") -> "SolverConfig":
