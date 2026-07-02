@@ -1,0 +1,9 @@
+id: custom/h_matrix_chain
+origin: custom
+title: Matrix-chain multiplication (minimum cost)
+entrypoint: min_matrix_mult
+signature: "min_matrix_mult(dims: list[int]) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 200, seed: 1234}

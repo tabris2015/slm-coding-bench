@@ -1,0 +1,9 @@
+id: custom/h_damerau
+origin: custom
+title: Restricted Damerau-Levenshtein distance
+entrypoint: edit_distance_transpose
+signature: "edit_distance_transpose(a: str, b: str) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 200, seed: 1234}

@@ -1,0 +1,9 @@
+id: custom/h_weighted_interval
+origin: custom
+title: Weighted interval scheduling (max weight)
+entrypoint: max_interval_weight
+signature: "max_interval_weight(intervals: list[list[int]]) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 200, seed: 1234}

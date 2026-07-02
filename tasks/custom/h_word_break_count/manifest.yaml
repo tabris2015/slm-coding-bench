@@ -1,0 +1,9 @@
+id: custom/h_word_break_count
+origin: custom
+title: Count word-break segmentations
+entrypoint: count_segmentations
+signature: "count_segmentations(s: str, words: list[str]) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 200, seed: 1234}

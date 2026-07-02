@@ -1,0 +1,9 @@
+id: custom/h_circular_max_sum
+origin: custom
+title: Maximum circular subarray sum
+entrypoint: max_circular_subarray
+signature: "max_circular_subarray(nums: list[int]) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 200, seed: 1234}

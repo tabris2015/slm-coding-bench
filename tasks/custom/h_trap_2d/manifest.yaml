@@ -1,0 +1,9 @@
+id: custom/h_trap_2d
+origin: custom
+title: 2D trapping rain water
+entrypoint: trap_water_2d
+signature: "trap_water_2d(grid: list[list[int]]) -> int"
+suites: [test, parity]
+reference_file: reference.py
+generators_file: generators.py
+parity: {num_cases: 150, seed: 1234}
